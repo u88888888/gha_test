@@ -20,7 +20,7 @@ jobs:
     name: Publish to NFSN
     runs-on: ubuntu-latest
     needs: build
-    concurrency: "publish-${{ github.event_name }}"
+    concurrency: "${{ github.workflow }}-${{ github.job }}"
     steps:
       - {name: Check out repository code, uses: actions/checkout@v2}
       - {name: Fetch HTML files, uses: actions/download-artifact@v2, with: {name: html, path: build/html/}}
