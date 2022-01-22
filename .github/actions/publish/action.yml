@@ -1,0 +1,54 @@
+name: Publish to NFSN
+description: Rsync HTML files to web host and purge Cloudflare cache
+
+inputs:
+  prod:
+    description: Whether to deploy to production instead of stage
+    required: false
+    default: "true"
+  nfsn-key:
+    description: SSH private key
+    required: false
+    default: "${{ secrets.NFSN_SSH_KEY }}"
+  nfsn-known-host:
+    description: SSH known host public key
+    required: false
+    default: "${{ secrets.NFSN_SSH_KNOWN_HOST }}"
+  nfsn-host:
+    description: SSH hostname
+    required: false
+    default: ssh.phx.nearlyfreespeech.net
+  nfsn-user-stage:
+    description: SSH user for stage environment
+    required: false
+    default: "${{ secrets.NFSN_SSH_USER_STAGE }}"
+  nfsn-user-prod:
+    description: SSH user for production environment
+    required: false
+    default: "${{ secrets.NFSN_SSH_USER_PROD }}"
+  cf-zone-id:
+    description: Cloudflare zone identifier for API call
+    required: false
+    default: 5efb26a03250a8bc392727af05a39aba
+  cf-auth:
+    description: Cloudflare API authentication token
+    required: false
+    default: "${{ secrets.CLOUDFLARE_TOKEN }}"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup SSH
+      uses: shimataro/ssh-key-action@v2
+      with: {key: "${{ inputs.nfsn-key }}", known_hosts: "${{ inputs.nfsn-known-host }}"}
+    - name: Rsync
+      env:
+        NFSN_USER: "${{ inputs.prod == 'true' && inputs.nfsn-user-prod || inputs.nfsn-user-stage }}"
+      shell: bash
+      run: rsync -rptcivh --delete-after --stats html/ ${{ env.NFSN_USER }}@${{ inputs.nfsn-host }}:/home/public
+    - name: Purge Cloudflare Cache
+      env:
+        CF_AUTH: "Authorization: Bearer ${{ inputs.cf-auth }}"
+        CF_URL: "https://api.cloudflare.com/client/v4/zones/${{ inputs.cf-zone-id }}/purge_cache"
+      shell: bash
+      run: curl -vf -X POST "${{ env.CF_URL }}" -H "${{ env.CF_AUTH }}" --data '{"purge_everything":true}'
