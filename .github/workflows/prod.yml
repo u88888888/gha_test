@@ -43,9 +43,8 @@ jobs:
       - name: Determine title and body
         id: data
         run: |
-          grep -A5 "^## ${{ github.ref_name }}$" CHANGELOG.md
           awk -v start='^## ${{ github.ref_name }}$' -v end='^## ' '
-            $0~start { nr=NR; next }
-            $0~end   { if(nr) exit }
-            /./      { if(nr) print }
+            $0~start      { nr=NR; next }
+            $0~end && nr  { exit }
+            /./ && nr     { print }
           ' CHANGELOG.md
