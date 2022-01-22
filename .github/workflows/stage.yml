@@ -20,6 +20,7 @@ jobs:
     needs: build
     concurrency: "publish-${{ github.event_name }}"
     steps:
+      - {name: Check out repository code, uses: actions/checkout@v2}
       - {name: Fetch HTML files, uses: actions/download-artifact@v2, with: {name: html, path: html}}
       - {name: Publish, uses: ./.github/actions/publish, with: {prod: "false"}}
 
