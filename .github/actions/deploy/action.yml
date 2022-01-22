@@ -42,10 +42,10 @@ runs:
       with: {key: "${{ inputs.ssh-key }}", known_hosts: "${{ inputs.known-hosts }}"}
     - name: Rsync
       shell: bash
-      run: rsync -rptcivh --delete-after --stats ${{ inputs.source }} ${{ inputs.user }}@${{ inputs.host }}:${{ inputs.target }}
+      run: echo rsync -rptcivh --delete-after --stats ${{ inputs.source }} ${{ inputs.user }}@${{ inputs.host }}:${{ inputs.target }}
     - name: Purge Cloudflare Cache
       env:
         CF_AUTH: "Authorization: Bearer ${{ inputs.cf-token }}"
         CF_URL: "https://api.cloudflare.com/client/v4/zones/${{ inputs.cf-zone-id }}/purge_cache"
       shell: bash
-      run: curl -f '${{ env.CF_URL }}' -H '${{ env.CF_AUTH }}' --data '{"purge_everything":true}'
+      run: echo curl -f '${{ env.CF_URL }}' -H '${{ env.CF_AUTH }}' --data '{"purge_everything":true}'
