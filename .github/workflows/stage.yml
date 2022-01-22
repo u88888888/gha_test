@@ -40,8 +40,8 @@ jobs:
     steps:
       - {name: Fetch HTML files, uses: actions/download-artifact@v2, with: {name: html, path: html}}
       - {name: Archive HTML files, run: tar -czvf html.tar.gz html/}
-      - name: Get commit title and body
-        id: commit
+      - name: Determine title and body
+        id: data
         run: |
           jq -r .head_commit.message < "$GITHUB_EVENT_PATH" |head -1 > title.txt
           test -s title.txt || echo "*No title*" > $_
@@ -51,7 +51,7 @@ jobs:
       - name: Create or update prerelease
         uses: softprops/action-gh-release@v1
         with:
-          name: "${{ steps.commit.outputs.title }}"
+          name: "${{ steps.data.outputs.title }}"
           body_path: body.txt
           tag_name: prerelease
           prerelease: true
