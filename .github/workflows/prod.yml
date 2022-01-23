@@ -57,3 +57,9 @@ jobs:
               if (t !~ /^[A-Za-z0-9]/) error("Invalid title for section in CHANGELOG.md")
             }
           ' CHANGELOG.md
+      - name: Create Release from tag
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "${{ steps.data.outputs.title }}"
+          body_path: body.log
+          files: html.tar.gz
