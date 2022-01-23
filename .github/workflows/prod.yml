@@ -44,7 +44,10 @@ jobs:
         id: data
         run: |
           awk -v start='^## ${{ github.ref_name }}$' -v end='^## ' '
-            $0~start      { nr=NR; next }
-            $0~end && nr  { exit }
-            /./ && nr     { print }
+            BEGIN               { printf("") > "body.txt" }
+            $0~start            { nr=NR; next }
+            $0~end && nr        { exit }
+            nr && NR - nr == 2  { printf("::set-output name=title::%s\n", $0) }
+            nr && NR - nr >= 4  { print >> "body.txt" }
           ' CHANGELOG.md
+      - run: cat body.txt
