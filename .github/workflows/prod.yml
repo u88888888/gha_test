@@ -44,11 +44,11 @@ jobs:
         id: data
         run: |
           awk -v start='^## ${{ github.ref_name }}$' -v end='^## ' '
-            BEGIN               { printf("") > "body.txt" }
+            BEGIN               { printf("") > "body.log" }
             $0~start            { nr=NR; next }
             $0~end && nr        { exit }
             nr && NR - nr == 2  { printf("::set-output name=title::%s\n", $0); t=$0 }
-            nr && NR - nr >= 4  { print >> "body.txt" }
+            nr && NR - nr >= 4  { print >> "body.log" }
 
             function error(msg) {  printf("ERROR: %s\n", msg) > "/dev/stderr"; exit 1 }
             END {
@@ -57,4 +57,3 @@ jobs:
               if (t !~ /^[A-Za-z0-9]/) error("Invalid title for section in CHANGELOG.md")
             }
           ' CHANGELOG.md
-      - run: cat body.txt

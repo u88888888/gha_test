@@ -43,16 +43,16 @@ jobs:
       - name: Determine title and body
         id: data
         run: |
-          jq -r .head_commit.message < "$GITHUB_EVENT_PATH" |head -1 > title.txt
-          test -s title.txt || echo "*No title*" > $_
-          xargs -0 printf '::set-output name=title::%s' < title.txt
-          jq -r .head_commit.message < "$GITHUB_EVENT_PATH" |tail -n+3 > body.txt
-          test -s body.txt || cp title.txt $_
+          jq -r .head_commit.message < "$GITHUB_EVENT_PATH" |head -1 > title.log
+          test -s title.log || echo "*No title*" > $_
+          xargs -0 printf '::set-output name=title::%s' < title.log
+          jq -r .head_commit.message < "$GITHUB_EVENT_PATH" |tail -n+3 > body.log
+          test -s body.log || cp title.log $_
       - name: Create or update prerelease
         uses: softprops/action-gh-release@v1
         with:
           name: "${{ steps.data.outputs.title }}"
-          body_path: body.txt
+          body_path: body.log
           tag_name: prerelease
           prerelease: true
           target_commitish: "${{ github.ref }}"
